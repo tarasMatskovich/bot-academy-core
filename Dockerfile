@@ -7,7 +7,7 @@ WORKDIR /var/www
 # Install dependencies
 RUN apt-get update \
 	# gd
-	&& apt-get install -y --no-install-recommends build-essential  openssl nginx libfreetype6-dev libjpeg-dev libpng-dev libwebp-dev zlib1g-dev libzip-dev gcc g++ make vim unzip curl git jpegoptim optipng pngquant gifsicle locales libonig-dev supervisor  \
+	&& apt-get install -y --no-install-recommends build-essential  openssl nginx libfreetype6-dev libjpeg-dev libpng-dev libwebp-dev zlib1g-dev libzip-dev gcc g++ make vim unzip curl git jpegoptim optipng pngquant gifsicle locales libonig-dev supervisor cron  \
 	&& docker-php-ext-configure gd  \
 	&& docker-php-ext-install gd \
 	# gmp
@@ -23,7 +23,7 @@ RUN apt-get update \
 	&& docker-php-ext-install zip \
 	&& apt-get autoclean -y \
 	&& rm -rf /var/lib/apt/lists/* \
-	&& rm -rf /tmp/pear/
+	&& rm -rf /tmp/pear/ \
 
 # Install extensions
 RUN docker-php-ext-install pcntl
@@ -38,9 +38,9 @@ COPY ./docker/php/local.ini /usr/local/etc/php/local.ini
 # Setup Nginx
 COPY ./docker/nginx/conf.d/nginx.conf /etc/nginx/nginx.conf
 
-# Setup supervisor
-COPY ./docker/supervisor/worker/worker-hight-priority-queue.conf /etc/supervisor/conf.d/
-COPY ./docker/supervisor/worker/worker-low-priority-queue.conf /etc/supervisor/conf.d/
+## Setup supervisor
+#COPY ./docker/supervisor/worker/worker-hight-priority-queue.conf /etc/supervisor/conf.d/
+#COPY ./docker/supervisor/worker/worker-low-priority-queue.conf /etc/supervisor/conf.d/
 
 RUN chmod +rwx /var/www
 
@@ -52,6 +52,8 @@ RUN curl -sS https://getcomposer.org/installer | php -- --install-dir=/usr/local
 RUN composer install --working-dir="/var/www"
 
 RUN composer dump-autoload --working-dir="/var/www"
+
+RUN bash /var/www/docker/provision/after-build.sh
 
 EXPOSE 80
 
