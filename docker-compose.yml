@@ -23,7 +23,7 @@ services:
 
     #MySQL Service
     mysql:
-        image: arm64v8/mysql:8.0
+        image: mysql:8.0
         container_name: mysql
         restart: unless-stopped
         tty: true
@@ -45,7 +45,7 @@ services:
 
     #PHPMyadmin Service
     phpmyadmin:
-        image: arm64v8/phpmyadmin:5.2.1-apache
+        image: phpmyadmin:5.2.1-apache
         container_name: phpmyadmin
         restart: unless-stopped
         links:
@@ -60,7 +60,7 @@ services:
             - api-network
 
     redis:
-        image: arm64v8/redis:6.0.5-alpine
+        image: redis:6.0.5-alpine
         container_name: infra-redis
         ports:
             - "6380:6379"
