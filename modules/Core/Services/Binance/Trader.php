@@ -54,14 +54,12 @@ class Trader
                 return;
             }
             $quote = $this->spot->getQuote($strategy->getDefaultConvert(), $strategy->coin, $last->total);
-            dump($quote);
             $quoteId = (string)$quote['quoteId'];
             $toAmount = (int)floor((float)$quote['toAmount']);
             if (!$quoteId || !$toAmount) {
                 throw new \Exception('Error on get quote');
             }
             $result = $this->spot->acceptQuote($quoteId);
-            dump($result);
             $trade = new Trade();
             $trade->user_id = $strategy->user_id;
             $trade->coin = $strategy->coin;
@@ -70,13 +68,11 @@ class Trader
             $trade->total = $last->total;
             $trade->save();
         } else {
-            dump('BUY');
             $symbol = $strategy->coin . $strategy->getDefaultConvert();
             $ticker = $this->spot->tickerPrice(['symbol' => $symbol]);
             $price = (float)$ticker['price'];
             $total = $price * $last->amount;
             $diff = $total - $last->total;
-            dump($diff);
             if ($diff > (-$strategy->target)) {
                 // end of deal
                 return;
@@ -99,7 +95,6 @@ class Trader
         if (!$free) {
             throw new \Exception('Target coin was not found in balance');
         }
-        dump($free);
         $quote = $this->spot->getQuote($strategy->coin, $strategy->getDefaultConvert(), $free);
         $quoteId = (string)$quote['quoteId'];
         $toAmount = (float)$quote['toAmount'];
@@ -107,7 +102,6 @@ class Trader
             throw new \Exception('Error on get quote');
         }
         $result = $this->spot->acceptQuote($quoteId);
-        dump($result);
         $trade = new Trade();
         $trade->user_id = $strategy->user_id;
         $trade->coin = $strategy->coin;
