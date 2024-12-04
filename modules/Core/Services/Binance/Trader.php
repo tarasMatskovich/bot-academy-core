@@ -6,6 +6,7 @@ namespace BotAcademy\Core\Services\Binance;
 
 use BotAcademy\Users\Models\Attempt;
 use BotAcademy\Users\Models\BinanceToken;
+use BotAcademy\Users\Models\Log;
 use BotAcademy\Users\Models\Strategy;
 use BotAcademy\Users\Models\Trade;
 use Illuminate\Support\Facades\DB;
@@ -49,6 +50,15 @@ class Trader
             $price = (float)$ticker['price'];
             $total = $price * $last->amount;
             $diff = $total - $last->total;
+            $buyTicker = new Log();
+            $buyTicker->action = 'buy-ticker';
+            $buyTickerData = [
+                'total' => $total,
+                'last_total' => $last->total,
+                'diff' => $diff,
+            ];
+            $buyTicker->data = json_encode($buyTickerData);
+            $buyTicker->save();
             if ($diff < $strategy->target) {
                 // deal ends
                 return;
@@ -56,6 +66,13 @@ class Trader
             $quote = $this->spot->getQuote($strategy->getDefaultConvert(), $strategy->coin, $last->total);
             $quoteId = (string)$quote['quoteId'];
             $toAmount = (int)floor((float)$quote['toAmount']);
+            $buyQuote = new Log();
+            $buyQuote->action = 'buy-quote';
+            $buyQuoteData = [
+                'toAmount' => $toAmount,
+            ];
+            $buyQuote->data = json_encode($buyQuoteData);
+            $buyQuote->save();
             if (!$quoteId || !$toAmount) {
                 throw new \Exception('Error on get quote');
             }
@@ -73,6 +90,15 @@ class Trader
             $price = (float)$ticker['price'];
             $total = $price * $last->amount;
             $diff = $total - $last->total;
+            $sellTicker = new Log();
+            $sellTicker->action = 'sell-ticker';
+            $sellTickerData = [
+                'total' => $total,
+                'last_total' => $last->total,
+                'diff' => $diff,
+            ];
+            $sellTicker->data = json_encode($sellTickerData);
+            $sellTicker->save();
             if ($diff > (-$strategy->target)) {
                 // end of deal
                 return;
@@ -98,6 +124,13 @@ class Trader
         $quote = $this->spot->getQuote($strategy->coin, $strategy->getDefaultConvert(), $free);
         $quoteId = (string)$quote['quoteId'];
         $toAmount = (float)$quote['toAmount'];
+        $sellQuote = new Log();
+        $sellQuote->action = 'sell-quote';
+        $sellQuoteData = [
+            'toAmount' => $toAmount,
+        ];
+        $sellQuote->data = json_encode($sellQuoteData);
+        $sellQuote->save();
         if (!$quoteId || !$toAmount) {
             throw new \Exception('Error on get quote');
         }
