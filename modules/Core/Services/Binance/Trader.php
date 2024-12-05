@@ -48,8 +48,8 @@ class Trader
             $symbol = $strategy->coin . $strategy->getDefaultConvert();
             $ticker = $this->spot->tickerPrice(['symbol' => $symbol]);
             $price = (float)$ticker['price'];
-            $total = $price * $last->amount;
-            $diff = $total - $last->total;
+            $total = $price * $last->amount; // total = 4, last total = 5
+            $diff = $total - $last->total; // -1
             $buyTicker = new Log();
             $buyTicker->action = 'buy-ticker';
             $buyTickerData = [
@@ -59,8 +59,12 @@ class Trader
             ];
             $buyTicker->data = json_encode($buyTickerData);
             $buyTicker->save();
-            if ($diff < $strategy->target) {
-                // deal ends
+            if ($diff >= 0) {
+                return;
+            }
+            $diff = abs($diff);
+            $diffInPercents = $diff / $last->total;
+            if ($diffInPercents < $strategy->target) {
                 return;
             }
             $quote = $this->spot->getQuote($strategy->getDefaultConvert(), $strategy->coin, $last->total);
@@ -89,7 +93,7 @@ class Trader
             $ticker = $this->spot->tickerPrice(['symbol' => $symbol]);
             $price = (float)$ticker['price'];
             $total = $price * $last->amount;
-            $diff = $total - $last->total;
+            $diff = $total - $last->total; // total = 6, last total = 5, diff = 1
             $sellTicker = new Log();
             $sellTicker->action = 'sell-ticker';
             $sellTickerData = [
@@ -99,8 +103,11 @@ class Trader
             ];
             $sellTicker->data = json_encode($sellTickerData);
             $sellTicker->save();
-            if ($diff > (-$strategy->target)) {
-                // end of deal
+            if ($diff <= 0) {
+                return;
+            }
+            $diffInPercents = $diff / $last->total;
+            if ($diffInPercents < $strategy->target) {
                 return;
             }
             $this->sell($strategy);
