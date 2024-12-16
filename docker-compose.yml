@@ -28,13 +28,12 @@ services:
         restart: unless-stopped
         tty: true
         ports:
-            - "3306:3306"
+            - "3448:3306"
         environment:
             MYSQL_USER: 'mysql_user'
-            MYSQL_PASSWORD: '12345'
+            MYSQL_PASSWORD: ${DB_PASSWORD}
             MYSQL_DATABASE: core
-            MYSQL_ALLOW_EMPTY_PASSWORD: 'true'
-            MYSQL_ROOT_PASSWORD: 12345
+            MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
             SERVICE_TAGS: dev
             SERVICE_NAME: mysql
         volumes:
